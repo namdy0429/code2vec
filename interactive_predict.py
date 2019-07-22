@@ -1,5 +1,5 @@
 import traceback
-
+import glob
 from common import common
 from extractor import Extractor
 
@@ -40,11 +40,9 @@ class InteractivePredictor:
             except ValueError as e:
                 print(e)
                 continue
-            raw_prediction_results = self.model.predict(predict_lines)
-            method_prediction_results = common.parse_prediction_results(
-                raw_prediction_results, hash_to_string_dict,
-                self.model.vocabs.target_vocab.special_words, topk=SHOW_TOP_CONTEXTS)
-            for raw_prediction, method_prediction in zip(raw_prediction_results, method_prediction_results):
+            results, code_vectors = self.model.predict(predict_lines)
+            prediction_results = common.parse_results(results, hash_to_string_dict, topk=SHOW_TOP_CONTEXTS)
+            for i, method_prediction in enumerate(prediction_results):
                 print('Original name:\t' + method_prediction.original_name)
                 for name_prob_pair in method_prediction.predictions:
                     print('\t(%f) predicted: %s' % (name_prob_pair['probability'], name_prob_pair['name']))
@@ -54,4 +52,41 @@ class InteractivePredictor:
                     attention_obj['score'], attention_obj['token1'], attention_obj['path'], attention_obj['token2']))
                 if self.config.EXPORT_CODE_VECTORS:
                     print('Code vector:')
-                    print(' '.join(map(str, raw_prediction.code_vector)))
+                    print(' '.join(map(str, code_vectors[i])))
+
+    def dn_predict(self):
+        # input_filename = 'Input.java'
+        # input_filename = input()
+        print('Starting interactive prediction...')
+        data_list = glob.glob("data/in_use/*/*.java")
+        for input_filename in data_list:
+        # while True:
+            # print(
+                # 'Modify the file: "%s" and press any key when ready, or "q" / "quit" / "exit" to exit' % input_filename)
+            # user_input = input()
+            # input_filename = input()
+            # if user_input.lower() in self.exit_keywords:
+            print(input_filename)
+            if input_filename.lower() in self.exit_keywords:
+                print('Exiting...')
+                return
+            try:
+                predict_lines, hash_to_string_dict = self.path_extractor.extract_paths(input_filename)
+            except ValueError as e:
+                print(e)
+                continue
+            results, code_vectors = self.model.predict(predict_lines)
+            prediction_results = common.parse_results(results, hash_to_string_dict, topk=SHOW_TOP_CONTEXTS)
+            for i, method_prediction in enumerate(prediction_results):
+                print('Original name:\t' + method_prediction.original_name)
+                for name_prob_pair in method_prediction.predictions:
+                    print('\t(%f) predicted: %s' % (name_prob_pair['probability'], name_prob_pair['name']))
+                print('Attention:')
+                for attention_obj in method_prediction.attention_paths:
+                    print('%f\tcontext: %s,%s,%s' % (
+                    attention_obj['score'], attention_obj['token1'], attention_obj['path'], attention_obj['token2']))
+                if self.config.EXPORT_CODE_VECTORS:
+                    print('Code vector:')
+                    print(' '.join(map(str, code_vectors[i])))
+                    with open('jms_output.txt', 'a') as f_out:
+                        f_out.write("{}\t{}\n".format(input_filename, ', '.join(map(str, code_vectors[i]))))
