@@ -7,11 +7,13 @@ public class MethodContent {
 	private ArrayList<Node> leaves;
 	private String name;
 	private long length;
+	private String comment;
 
-	public MethodContent(ArrayList<Node> leaves, String name, long length) {
+	public MethodContent(ArrayList<Node> leaves, String name, long length, String comment) {
 		this.leaves = leaves;
 		this.name = name;
 		this.length = length;
+		this.comment = comment;
 	}
 
 	public ArrayList<Node> getLeaves() {
@@ -24,6 +26,10 @@ public class MethodContent {
 
 	public long getLength() {
 		return length;
+	}
+
+	public String getJavaDoc() {
+		return comment;
 	}
 
 }

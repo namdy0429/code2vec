@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.comments.Comment;
+import com.github.javaparser.ast.comments.JavadocComment;
 import com.github.javaparser.ast.expr.NullLiteralExpr;
 import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
@@ -14,12 +15,17 @@ import JavaExtractor.FeaturesEntities.Property;
 
 public class LeavesCollectorVisitor extends TreeVisitor {
 	ArrayList<Node> m_Leaves = new ArrayList<>(); 
+	String javadoc_comments;
 	private int currentId = 1;
 
 	@Override
 	public void process(Node node) {
 		if (node instanceof Comment) {
 			return;
+		}
+		if (isJavaDoc(node)) {
+			// TODO: if method contains multiple javadoc comments
+			javadoc_comments = node.toString();
 		}
 		boolean isLeaf = false;
 		boolean isGenericParent = isGenericParent(node);
@@ -45,6 +51,10 @@ public class LeavesCollectorVisitor extends TreeVisitor {
 	private boolean hasNoChildren(Node node) {
 		return node.getChildrenNodes().size() == 0;
 	}
+
+	private boolean isJavaDoc(Node node) {
+		return node instanceof JavadocComment;
+	}
 	
 	private boolean isNotComment(Node node) {
 		return !(node instanceof Comment) && !(node instanceof Statement);
@@ -52,6 +62,17 @@ public class LeavesCollectorVisitor extends TreeVisitor {
 	
 	public ArrayList<Node> getLeaves() {
 		return m_Leaves;
+	}
+
+	public String getJavaDoc() {
+		// TODO: stopwords
+		String[] sentences = javadoc_comments.split(". ");
+		if (sentences.length > 0 ) {
+			return sentences[0];
+		}
+		else {
+			return Common.BlankWord;
+		}
 	}
 	
 	private int getChildId(Node node) {
