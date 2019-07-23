@@ -2,6 +2,7 @@ package JavaExtractor.Visitors;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Arrays;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.comments.Comment;
 import com.github.javaparser.ast.comments.JavadocComment;
@@ -13,20 +14,27 @@ import com.github.javaparser.ast.visitor.TreeVisitor;
 import JavaExtractor.Common.Common;
 import JavaExtractor.FeaturesEntities.Property;
 
+import com.google.common.base.CharMatcher;
+
 public class LeavesCollectorVisitor extends TreeVisitor {
 	ArrayList<Node> m_Leaves = new ArrayList<>(); 
-	String javadoc_comments;
+	String javadoc_comments = "";
 	private int currentId = 1;
 
 	@Override
 	public void process(Node node) {
+		if (node.getComment() != null) {
+		// if (node.getComment() != null && node.getComment() instanceof JavadocComment) {
+			// System.out.println(node.getComment());
+			// System.out.println(node.getComment() instanceof JavadocComment);
+			if (node.getComment() instanceof JavadocComment) {
+				javadoc_comments = node.getComment().toString();	
+			}
+		}
 		if (node instanceof Comment) {
 			return;
 		}
-		if (isJavaDoc(node)) {
-			// TODO: if method contains multiple javadoc comments
-			javadoc_comments = node.toString();
-		}
+
 		boolean isLeaf = false;
 		boolean isGenericParent = isGenericParent(node);
 		if (hasNoChildren(node) && isNotComment(node)) {
@@ -53,7 +61,7 @@ public class LeavesCollectorVisitor extends TreeVisitor {
 	}
 
 	private boolean isJavaDoc(Node node) {
-		return node instanceof JavadocComment;
+		return node.getComment() instanceof JavadocComment;
 	}
 	
 	private boolean isNotComment(Node node) {
@@ -65,13 +73,20 @@ public class LeavesCollectorVisitor extends TreeVisitor {
 	}
 
 	public String getJavaDoc() {
+		// return javadoc_comments;
 		// TODO: stopwords
-		String[] sentences = javadoc_comments.split(". ");
+		if (!CharMatcher.ascii().matchesAllOf(javadoc_comments)) {
+			return "";
+		}
+
+		String[] sentences = javadoc_comments.replace("*", "").replace("/", "").replace("\n", "").split("\\.");
+		// System.out.println(javadoc_comments);
 		if (sentences.length > 0 ) {
-			return sentences[0];
+			sentences = sentences[0].split("@");
+			return sentences[0].trim().replaceAll(" +", "|");
 		}
 		else {
-			return Common.BlankWord;
+			return "";
 		}
 	}
 	

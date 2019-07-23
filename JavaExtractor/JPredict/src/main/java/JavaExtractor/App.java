@@ -50,6 +50,7 @@ public class App {
 			return;
 		}
 		try {
+			System.out.println(tasks.size());
 			executor.invokeAll(tasks);
 		} catch (InterruptedException e) {
 			e.printStackTrace();

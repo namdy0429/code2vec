@@ -53,6 +53,7 @@ public class ExtractFeaturesTask implements Callable<Void> {
 
 	public ArrayList<ProgramFeatures> extractSingleFile() throws ParseException, IOException {
 		String code = null;
+		System.out.println(this.filePath);
 		try {
 			code = new String(Files.readAllBytes(this.filePath));
 		} catch (IOException e) {

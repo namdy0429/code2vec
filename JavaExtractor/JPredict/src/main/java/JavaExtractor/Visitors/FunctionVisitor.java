@@ -34,13 +34,17 @@ public class FunctionVisitor extends VoidVisitorAdapter<Object> {
 			splitName = splitNameParts.stream().collect(Collectors.joining(Common.internalSeparator));
 		}
 
-		ArrayList<String> splitJavaDocParts = Common.splitToSubtokens(leavesCollectorVisitor.getJavaDoc());
-		String splitJavaDoc = Common.normalizeName(leavesCollectorVisitor.getJavaDoc(), Common.BlankWord);
-		if (splitJavaDocParts.size() > 0) {
-			splitJavaDoc = splitNameParts.stream().collect(Collectors.joining(Common.internalSeparator));
-		}
+		// ArrayList<String> splitJavaDocParts = Common.splitToSubtokens(leavesCollectorVisitor.getJavaDoc());
+		String splitJavaDoc = leavesCollectorVisitor.getJavaDoc();
+		// System.out.println(splitJavaDoc);
+		// String splitJavaDoc = Common.normalizeName(leavesCollectorVisitor.getJavaDoc(), Common.BlankWord);
+		// if (splitJavaDocParts.size() > 0) {
+		// 	splitJavaDoc = splitNameParts.stream().collect(Collectors.joining(Common.internalSeparator));
+		// }
 
-		if (node.getBody() != null && !splitJavaDoc.equals(Common.BlankWord)) {
+		if (node.getBody() != null && ! splitJavaDoc.equals("")) {
+			// System.out.println(node.getName());
+			// System.out.println(splitJavaDoc);
 			m_Methods.add(new MethodContent(leaves, splitName, getMethodLength(node.getBody().toString()), splitJavaDoc));
 		}
 	}

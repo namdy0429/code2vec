@@ -63,9 +63,9 @@ public class Property {
 			Name = ((ClassOrInterfaceType) node).toUnboxedType().toString();
 		}
 
-		if (Common.isMethod(node, Type)) {
-			Name = SplitName = Common.methodName;
-		}
+		// if (Common.isMethod(node, Type)) {
+		// 	Name = SplitName = Common.methodName;
+		// }
 
 		if (SplitName.length() == 0) {
 			SplitName = Name;
